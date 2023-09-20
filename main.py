@@ -12,21 +12,26 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from utils import *
 
+
+import torch
+torch.cuda.empty_cache() 
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
+
 parser = argparse.ArgumentParser(description="DnCNN")
 parser.add_argument("--debug", type=str, default='Y', help='whether to use 5 training pictures [Y N]')
 parser.add_argument("--resume", type=bool, default=False, help="whether to load model file")
 parser.add_argument("--model_name", type=str, default='net_final.pth', help='load this model')
 parser.add_argument("--start_epoch", type=int, default=0, help="the start of training epochs")
 parser.add_argument("--preprocess", type=bool, default=False, help='run prepare_data or not')
-parser.add_argument("--batchSize", type=int, default=128, help="Training batch size")
-parser.add_argument("--epochs", type=int, default=50, help="Number of training epochs")
-parser.add_argument("--milestone1", type=int, default=10, help="first time to decay learning rate; should be less than epochs")
-parser.add_argument("--milestone2", type=int, default=20, help="second time to decay learning rate; should be less than epochs")
-parser.add_argument("--lr", type=float, default=1e-3, help="Initial learning rate")
+parser.add_argument("--batchSize", type=int, default=1, help="Training batch size")
+parser.add_argument("--epochs", type=int, default=5, help="Number of training epochs")
+parser.add_argument("--milestone1", type=int, default=1, help="first time to decay learning rate; should be less than epochs")
+parser.add_argument("--milestone2", type=int, default=2, help="second time to decay learning rate; should be less than epochs")
+parser.add_argument("--lr", type=float, default=1e-4, help="Initial learning rate")
 parser.add_argument("--outf", type=str, default="logs/", help='path of log files')
 parser.add_argument("--train_id", type=str, default="00", help='path of log files')
-parser.add_argument("--noiseL", type=float, default=25, help='noise level; ignored when mode=B')
-parser.add_argument("--val_noiseL", type=float, default=25, help='noise level used on validation set')
+parser.add_argument("--noiseL", type=float, default=10, help='noise level; ignored when mode=B')
+parser.add_argument("--val_noiseL", type=float, default=10, help='noise level used on validation set')
 parser.add_argument("--gpu_id", type=str, default="0", help='use which gpu to train')
 
 opt = parser.parse_args()
@@ -80,7 +85,7 @@ def main():
     noiseL_B=[0,55] # ingnored when opt.mode=='S'
 
     for epoch in range(opt.start_epoch, opt.epochs):
-        if epoch < opt.milestone1:  # epoch大一些的时候，学习率变为十分之一
+        if epoch < opt.milestone1:  # epoch
             current_lr = opt.lr
         elif epoch < opt.milestone2:
             current_lr = opt.lr / 10.
@@ -99,12 +104,45 @@ def main():
             model.zero_grad()
             optimizer.zero_grad()
             img_train = data
+            
+            #img_train = img_train.squeeze(0)
+
+            #img_train = img_train.view(5, 3, 256, 256)
+
+            print('img_train: ',img_train.shape)
+            #img_train = img_train.permute(0, 4, 2, 3, 1).squeeze(-1)
+
             noise = torch.FloatTensor(img_train.size()).normal_(mean=0, std=opt.noiseL/255.)
-            imgn_train = img_train + noise  # 加入noise之后的
+            
+            imgn_train = img_train + noise  #add noise
+            
+            
+
+            
+            print('imgn_train.shape: ',imgn_train.shape)
+            
+            
+            img_train = img_train.permute(0, 1, 4, 2, 3)  # Adjust the dimensions
+            imgn_train = imgn_train.permute(0, 1, 4, 2, 3)  # Adjust the dimensions
+
+            img_train = img_train.reshape(-1, 3, 256, 256)  # Adjust the batch size
+            imgn_train = imgn_train.reshape(-1, 3, 256, 256)  # Adjust the batch size
+
             img_train, imgn_train = Variable(img_train.cuda()), Variable(imgn_train.cuda())
+            
+            #imgn_train = imgn_train.permute(0, 4, 2, 3, 1).squeeze(-1)
+            
+            #img_train, imgn_train = Variable(img_train.cuda()), Variable(imgn_train.cuda())
             # noise = Variable(noise.cuda())
+            
+            
+            #imgn_train = imgn_train.permute(0, 4, 2, 3, 1)
+            #imgn_train = imgn_train.reshape(-1, 3, 256, 256)
+            
             out_train = model(imgn_train)
-            loss = criterion(out_train, img_train) / (imgn_train.size()[0] * 2)
+            #loss = criterion(out_train, img_train) / (imgn_train.size()[0] * 2)
+            loss = criterion(out_train, img_train.squeeze(0)) / (imgn_train.size()[0] * 2)
+
             loss.backward()
             optimizer.step()
             # results

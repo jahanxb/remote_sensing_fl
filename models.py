@@ -72,7 +72,10 @@ class UpSample(nn.Module):
 class DMCN_prelu(nn.Module):
     def __init__(self, BN=True, width = 64):
         super(DMCN_prelu, self).__init__()
-        self.input1 = nn.Conv2d(in_channels=1, out_channels=width, kernel_size=3, stride=1, padding=1, bias=False)
+        #self.input1 = nn.Conv2d(in_channels=1, out_channels=width, kernel_size=3, stride=1, padding=1, bias=False)
+        self.input1 = nn.Conv2d(in_channels=3, out_channels=width, kernel_size=3, stride=1, padding=1, bias=False)
+
+        
         self.input2 = nn.Conv2d(in_channels=width, out_channels=width, kernel_size=3, stride=1, padding=1, bias=False)
         self.BN1 = nn.BatchNorm2d(width)
         self.input3 = nn.Conv2d(in_channels=width, out_channels=width, kernel_size=3, stride=1, padding=1, bias=False)
@@ -97,8 +100,11 @@ class DMCN_prelu(nn.Module):
         self.choose2 = nn.Conv2d(in_channels=width*2, out_channels=width, kernel_size=1, stride=1, padding=0, bias=False)
         self.resudial_layers2 = self.make_layer(BasicBlock, 5, BN, width)
 
-        self.output = nn.Conv2d(in_channels=width, out_channels=1, kernel_size=3, stride=1, padding=1, bias=False)
+        #self.output = nn.Conv2d(in_channels=width, out_channels=1, kernel_size=3, stride=1, padding=1, bias=False)
+        self.output = nn.Conv2d(in_channels=width, out_channels=3, kernel_size=3, stride=1, padding=1, bias=False)
 
+        
+        
         self.relu = nn.PReLU()
 
     def make_layer(self, block, num_of_layer, BN, width):
