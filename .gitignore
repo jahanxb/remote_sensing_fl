@@ -1,0 +1,5 @@
+venv/
+NWPU-RESISC45/
+data/train_small.h5
+data/val.h5
+data/train_small.h5 

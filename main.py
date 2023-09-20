@@ -23,7 +23,7 @@ parser.add_argument("--epochs", type=int, default=50, help="Number of training e
 parser.add_argument("--milestone1", type=int, default=10, help="first time to decay learning rate; should be less than epochs")
 parser.add_argument("--milestone2", type=int, default=20, help="second time to decay learning rate; should be less than epochs")
 parser.add_argument("--lr", type=float, default=1e-3, help="Initial learning rate")
-parser.add_argument("--outf", type=str, default="../logs/", help='path of log files')
+parser.add_argument("--outf", type=str, default="logs/", help='path of log files')
 parser.add_argument("--train_id", type=str, default="00", help='path of log files')
 parser.add_argument("--noiseL", type=float, default=25, help='noise level; ignored when mode=B')
 parser.add_argument("--val_noiseL", type=float, default=25, help='noise level used on validation set')
@@ -156,5 +156,5 @@ def main():
 if __name__ == "__main__":
     # print('begin to run ...')
     if opt.preprocess:
-        prepare_data(data_path='../data', patch_size=40, stride=10,  aug_times=1, debug=opt.debug)
+        prepare_data(data_path='data/', patch_size=40, stride=10,  aug_times=1, debug=opt.debug)
     main()

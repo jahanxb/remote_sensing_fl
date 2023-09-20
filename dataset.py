@@ -3,14 +3,14 @@ import os
 import os.path
 import random
 import sys
-sys.path.append('./')
-sys.path.append('../')
+#sys.path.append('./')
+#sys.path.append('../')
 import cv2
 import h5py
 import numpy as np
 import torch
 import torch.utils.data as udata
-
+#
 from utils import data_augmentation
 # print('i am here...')
 
@@ -39,10 +39,10 @@ def prepare_data(data_path, patch_size, stride, aug_times=1, debug='N'):
 
     if debug == 'Y':
         train_dir = 'train_small'
-        train_file_out = '../train_small.h5'
+        train_file_out = 'data/train_small.h5'
     else:
         train_dir = 'train'
-        train_file_out = '../train.h5'
+        train_file_out = 'data/train.h5'
     files = glob.glob(os.path.join(data_path, train_dir, '*.png'))  # 用来匹配所有的png
     files.sort()
     h5f = h5py.File(train_file_out, 'w')
@@ -71,7 +71,7 @@ def prepare_data(data_path, patch_size, stride, aug_times=1, debug='N'):
     files.clear()
     files = glob.glob(os.path.join(data_path, 'test', '*.png'))
     files.sort()
-    h5f = h5py.File('../val.h5', 'w')
+    h5f = h5py.File('data/val.h5', 'w')
     val_num = 0
     for i in range(len(files)):
         print("file: %s" % files[i])
@@ -97,12 +97,12 @@ class Dataset(udata.Dataset):
                 filename += '_small'
             filename += '.h5'
             print("\tset=={}, load file for train".format(filename))
-            h5f = h5py.File('../' + filename, 'r')
+            h5f = h5py.File('data/' + filename, 'r')
         else:
             filename = 'val'
             filename += '.h5'
             print("\tset=={}, load file for val".format(filename))
-            h5f = h5py.File('../' + filename, 'r')
+            h5f = h5py.File('data/' + filename, 'r')
         self.keys = list(h5f.keys())
         random.shuffle(self.keys)
         h5f.close()
@@ -116,11 +116,11 @@ class Dataset(udata.Dataset):
             if self.set == 'debug':
                 filename += '_small'
             filename += '.h5'
-            h5f = h5py.File('../' + filename, 'r')
+            h5f = h5py.File('data/' + filename, 'r')
         else:
             filename = 'val'
             filename += '.h5'
-            h5f = h5py.File('../' + filename, 'r')
+            h5f = h5py.File('data/' + filename, 'r')
         key = self.keys[index]
         data = np.array(h5f[key])
         h5f.close()
